@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: adapter-azure-ad
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: cnf4
+Implementation-Vendor-Id: com.vantia.homework
+Build-Jdk: 1.8.0_171-1-ojdkbuild
+Implementation-URL: https://projects.spring.io/spring-boot/#/spring-bo
+ ot-starter-parent/adapter-azure-ad
+Created-By: Maven Integration for Eclipse
+

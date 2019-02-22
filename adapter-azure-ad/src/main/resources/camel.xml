@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+	<!-- The following files are imported and used -->
+	<import resource="get-token-verify-route.xml" />
+	<import resource="beans.xml" />
+
+	<camelContext id="restRouteCamelContext"
+		xmlns="http://camel.apache.org/schema/spring">
+		<routeContextRef
+			ref="get-token-verify-route-context-v1" />
+		<onException>
+			<exception>com.ventia.homework.exception.InvalidTokenException</exception>
+			<exception>com.ventia.homework.exception.InvalidTokenPublicKeyException</exception>
+			<exception>com.ventia.homework.exception.NullTokenException</exception>
+			<exception>com.ventia.homework.exception.AzureADConnectionException</exception>
+			<exception>org.apache.camel.component.jsonvalidator.JsonValidationException</exception>
+			<handled>
+				<constant>true</constant>
+			</handled>
+			<setHeader headerName="Exchange.HTTP_RESPONSE_CODE">
+				<constant>400</constant>
+			</setHeader>
+			<setBody>
+				<simple>${exception.message}</simple>
+			</setBody>
+			<log loggingLevel="ERROR"
+				message="invalid request exception: ${exception}" />
+		</onException>
+		<onException>
+			<exception>java.lang.Exception
+			</exception>
+			<handled>
+				<constant>true</constant>
+			</handled>
+			<setHeader headerName="Exchange.HTTP_RESPONSE_CODE">
+				<constant>500</constant>
+			</setHeader>
+			<setBody>
+				<constant>The system could not process your request. Please retry
+					your request at a later date or contact bofh@theuniversity.com
+				</constant>
+			</setBody>
+			<log loggingLevel="ERROR"
+				message="general exception: ${exception}" />
+		</onException>
+		<rest path="/token-verify" id="restAzureTokenVerifyRoute">
+
+			<get id="getExpressionOfInsterest">
+
+				<to id="toGetExpressionOfInterestRoute"
+					uri="direct:verify-token-route" />
+
+			</get>
+
+		</rest>
+	</camelContext>
+</beans>

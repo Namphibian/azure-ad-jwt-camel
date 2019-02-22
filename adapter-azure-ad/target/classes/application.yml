@@ -1,0 +1,296 @@
+#------------------------------------------------------------------------------
+#  SPRING CONFIGURATION FILE.
+#  Try to keep as much configuration in here it keep camel routes clean
+#------------------------------------------------------------------------------
+# General Project Information
+# Note that properties using the @someproperty@ syntax refers to maven# 
+# properties. THus we propogate maven information into spring health checks 
+#------------------------------------------------------------------------------
+info:
+  app:
+    name: "adapter-azure-ad"
+    description: "Routes Used To Verify  Azure AD Tokens"
+    version: "0.0.1-SNAPSHOT"
+    encoding: "UTF-8"
+    api.version: 
+    java:
+      version: "1.8.0_171-1-ojdkbuild"
+      
+
+#------------------------------------------------------------------------------
+# This section configures the logging subsystem. 
+#
+#------------------------------------------------------------------------------
+logging:  
+  path: classpath:/logs
+  file: app.log
+  level:
+    ROOT: info
+
+    org:
+      apache:
+        camel: 
+          health: debug
+          impl:
+            health: debug
+          
+      springframework: info
+          
+          
+    com.ventia.homework: debug
+    io:
+      hawt: info
+      undertow: debug
+    #org.springframework: info
+#------------------------------------------------------------------------------
+# This is the main HTTP server configuration
+# Here we configure the base configuration for the servers.
+# Note that the SSL configuration is done here.
+# Both the rest dsl and the actuator HTTP servers use this 
+# as a base configuration
+#------------------------------------------------------------------------------
+server:
+  address: 0.0.0.0
+  port: 8080
+  ssl:
+    enabled: true    
+    key-alias: servercert
+    key-store: classpath:certs/keystore.jks
+    #key-store-type: PKCS12
+    key-password: password
+    #trust-store-type: PKCS12
+    #trust-store: classpath:certs/keystore.p12
+    #trust-store-password: password
+  servlet:
+    context-path: /
+  undertow:
+    accesslog:
+      enabled: true
+#------------------------------------------------------------------------------   
+# Camel configuration section
+# Note that most of the properties here are configured to their defaults.
+# Some of the optional properties are commented out.
+#
+#------------------------------------------------------------------------------
+
+
+camel:
+  
+  health:
+    enabled: true  
+    check:
+      
+      service:
+        enabled: true
+        check-interval: 10s
+        
+      routes:
+        enabled: true
+        thresholds:
+          exchanges-failed: 10        
+  
+   
+  springboot:
+    auto-startup: true     
+    name: "adapter-azure-ad"   
+    allow-use-original-message: true  
+    thread-name-pattern: "#camelId#-thread-#counter#"
+    consumer-template-cache-size: 1000
+    duration-max-idle-seconds: 0
+    duration-max-messages: 0
+    duration-max-seconds: 0
+    endpoint-runtime-statistics-enabled: false
+    handle-fault:  true
+    include-non-singletons: false
+    #-----------------------------------------------
+    #The following section is optional 
+    #file-configurations:
+    #java-routes-include-pattern:     
+    #java-routes-exclude-pattern:
+    #-----------------------------------------------      
+    jmx-create-connector: false
+    jmx-enabled: true
+    jmx-management-name-pattern: "#name#"
+    jmx-management-statistics-level: default
+    load-type-converters: true
+    log-debug-max-chars: 1000
+    log-exhausted-message-body: false
+    log-mask: false
+    main-run-controller: false
+    producer-template-cache-size: 10000
+    message-history:  true
+    shutdown-log-inflight-exchanges-on-timeout: true
+    shutdown-now-on-timeout: true
+    shutdown-routes-in-reverse-order: true
+    shutdown-suppress-logging-on-timeout: false
+    shutdown-timeout: 300
+    #-----------------------------------------------
+    # STREAM CACHE SETTINGS
+    #----------------------------------------------
+    stream-caching-any-spool-rules: false
+    stream-caching-buffer-size: 0
+    stream-caching-enabled: true
+    #-----------------------------------------------
+    #The following section is optional 
+    #stream-caching-spool-chiper:
+    #stream-caching-spool-used-heap-memory-limit: 
+    #stream-caching-remove-spool-directory-when-stopping: true
+    #stream-caching-spool-directory: /stream-spool
+    #stream-caching-spool-threshold: -1
+    #stream-caching-spool-used-heap-memory-threshold: 0
+    #stream-caching-statistics-enabled: false    
+    #-----------------------------------------------
+    # Camel Trace Formatting
+    #-----------------------------------------------
+    trace-formatter-show-body: true
+    trace-formatter-show-bread-crumb: true
+    trace-formatter-show-exception:  true
+    trace-formatter-show-exchange-id: false
+    trace-formatter-show-exchange-pattern: true
+    trace-formatter-show-headers: true
+    trace-formatter-show-node: true
+    trace-formatter-show-properties: false
+    trace-formatter-show-route-id: true
+    trace-formatter-show-short-exchange-id: false
+    tracer-formatter-max-chars: 10000
+    #tracer-formatter-bread-crumb-length:
+    #tracer-formatter-node-length: 
+    #tracer-formatter-show-body-type: 
+    tracing: false
+    type-conversion: true
+    use-breadcrumb: true
+    use-data-type: false
+    use-mdc-logging: true
+    #xml-rests: 
+    #xml-routes: 
+    #xml-routes-reload-directory:
+  #-----------------------------------------------
+  # This configures the camel REST endpoints.
+  #-----------------------------------------------  
+  rest:
+    component: servlet
+    port: 8080
+    host: 0.0.0.0  
+    binding-mode: json
+    data-format-property:
+      prettyPrint: false    
+    apiContextPath: "api-doc"
+    api-context-route-id: doc-api
+    api-property:
+      api.title: "adapter-azure-ad"
+      api.version: "V1.0"
+      cors: "true"
+    scheme: https    
+  component:
+    consul:
+      health:
+        check:
+          repository:
+            enabled: true
+    servlet:      
+      mapping:
+        contextPath: /v1.0/*
+    
+      
+hawtio:
+  authenticationEnabled: false
+#------------------------------------------------------------------------------
+# The SpringBoot Actuator Configuration Section
+# Here you can configure the actuator service 
+# By default we do not enable all endpoints(blacklist)
+#------------------------------------------------------------------------------
+management:
+  server:
+    port: 8080
+    
+  endpoints:    
+    web:
+      base-path: "/actuator"    
+      exposure:
+        include:
+        - "*"
+    enabled-by-default: true
+                
+  endpoint:
+    
+    auditevents:
+      enabled: true
+      cache:
+        time-to-live: 30s
+    beans:
+      enabled: true   
+      cache:
+        time-to-live: 30s
+    camelroutecontroller:
+      enabled: true
+      cache:
+        time-to-live: 60m
+    camelroutes:
+      enabled: true
+      cache:
+        time-to-live: 60s
+      read-only: true
+       
+    conditions:
+      enabled: true
+      cache:
+        time-to-live: 10s
+    configprops:
+      enabled: true
+      cache:
+        time-to-live: 10s
+      keys-to-sanitize:
+      - username
+      - password
+    env:
+      enabled: true
+    flyway:
+      enabled: false
+    health:
+      enabled: true
+      cache:
+        time-to-live: 15s
+      show-details:
+        when-authorized 
+      #roles:
+      #- 
+    heapdump:
+      enabled: true
+    httptrace:
+      enabled: true
+    info:
+      enabled: true
+      cache:
+        time-to-live: 30s
+    jolokia:
+      enabled: true
+
+        
+      #config:
+      #             
+    liquibase:
+      enabled: false  
+    logfile:
+      enabled: true
+    loggers:
+      enabled: true
+    mappings:
+      enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: false
+    scheduledtasks:
+      enabled: true
+    sessions:
+      enabled: true
+    shutdown:
+      enabled: false
+    threaddump:
+      enabled: true
+      
+  
+  
+ventia:
+  openidConfigURL: https://login.microsoftonline.com/common/.well-known/openid-configuration
+  useStubs: true

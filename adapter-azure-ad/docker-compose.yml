@@ -1,0 +1,17 @@
+version: '3.0'
+services:
+  kubectl:
+    image: nexus.corp.dmz:8083/kubernetes-utils:1.10.3
+    env_file: .env
+    volumes:
+      - .:/srv/app:Z
+      - ~/.kube:/root/.kube:Z
+    working_dir: /srv/app
+
+  builder:
+    image: nexus.corp.dmz:8083/java-base-builder:latest
+    env_file: .env
+    volumes:
+      - .:/srv/app:Z
+      - ~/.m2:/root/.m2:Z
+    working_dir: /srv/app

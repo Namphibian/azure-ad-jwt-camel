@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+	<!-- This file contains the route which is executed when a GET is executed 
+		on the token-very url. -->
+	<routeContext id="get-token-verify-route-context-v1"
+		xmlns="http://camel.apache.org/schema/spring">
+
+
+		<route id="get-token-verify-route-v1">
+			<from id="fromDirectVerifyToken" uri="direct:verify-token-route" />
+
+			<log message="Header information: ${headers}"
+				loggingLevel="DEBUG" logName="com.ventia.homework" />
+			<choice>
+				<when>
+					<simple>${header.jwttoken} != null</simple>
+					<log message="Found JWT Token Preparing To Validate."
+						loggingLevel="INFO" logName="com.ventia.homework" />
+					<bean ref="adToken" method="decodeToken" />
+					<log message="Token has been decoded proceeding to verify."
+						loggingLevel="INFO" logName="com.ventia.homework" />
+					<bean ref="adToken" method="verify" />
+					<setHeader headerName="uniqueName">
+						<method bean="adToken" method="getUniqueName" />
+					</setHeader>
+					<setBody>
+						<method bean="adToken" method="getUniqueName" />
+					</setBody>
+					<log message="Set UniqueName To Body And Header."
+						loggingLevel="INFO" logName="com.ventia.homework" />
+				</when>
+				<otherwise>
+					<log message="Did Not Find JWT Token." loggingLevel="WARN"
+						logName="com.ventia.homework" />
+					<throwException
+						exceptionType="com.ventia.homework.exception.InvalidTokenException"
+						message="No token found in header." />
+				</otherwise>
+			</choice>
+
+		</route>
+
+
+	</routeContext>
+
+</beans>
